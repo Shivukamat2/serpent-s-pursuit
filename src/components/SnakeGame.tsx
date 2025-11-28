@@ -40,6 +40,8 @@ export const SnakeGame = () => {
   const lastUpdateRef = useRef(0);
   const particlesRef = useRef<Particle[]>([]);
   const tongueRef = useRef(0);
+  const scoreRef = useRef(0);
+  const interpolationRef = useRef(0);
 
   const spawnCoin = () => {
     const canvas = canvasRef.current;
@@ -81,10 +83,18 @@ export const SnakeGame = () => {
 
   const drawSnake = (ctx: CanvasRenderingContext2D) => {
     const snake = snakeRef.current;
+    const interpolation = interpolationRef.current;
+    const direction = directionRef.current;
     
     snake.forEach((segment, index) => {
-      const x = segment.x * GRID_SIZE;
-      const y = segment.y * GRID_SIZE;
+      let x = segment.x * GRID_SIZE;
+      let y = segment.y * GRID_SIZE;
+      
+      // Smooth interpolation for head
+      if (index === 0) {
+        x -= direction.x * GRID_SIZE * interpolation;
+        y -= direction.y * GRID_SIZE * interpolation;
+      }
       const size = GRID_SIZE;
       const isHead = index === 0;
 
@@ -271,9 +281,13 @@ export const SnakeGame = () => {
     if (!canvas || !ctx || gameOver || !gameStarted) return;
 
     const deltaTime = timestamp - lastUpdateRef.current;
+    
+    // Update interpolation for smooth movement
+    interpolationRef.current = Math.min(1, deltaTime / speedRef.current);
 
     if (deltaTime >= speedRef.current) {
       lastUpdateRef.current = timestamp;
+      interpolationRef.current = 0;
 
       // Update direction
       directionRef.current = nextDirectionRef.current;
@@ -303,16 +317,16 @@ export const SnakeGame = () => {
 
       // Check coin collision
       if (newHead.x === coinRef.current.x && newHead.y === coinRef.current.y) {
-        const newScore = score + 1;
-        setScore(newScore);
+        scoreRef.current += 1;
+        setScore(scoreRef.current);
         
         const newTotal = totalCoins + 1;
         setTotalCoins(newTotal);
         localStorage.setItem("snakeTotalCoins", newTotal.toString());
 
-        if (newScore > bestScore) {
-          setBestScore(newScore);
-          localStorage.setItem("snakeBestScore", newScore.toString());
+        if (scoreRef.current > bestScore) {
+          setBestScore(scoreRef.current);
+          localStorage.setItem("snakeBestScore", scoreRef.current.toString());
         }
 
         createParticles(coinRef.current.x, coinRef.current.y);
@@ -343,6 +357,8 @@ export const SnakeGame = () => {
     nextDirectionRef.current = { x: 1, y: 0 };
     speedRef.current = INITIAL_SPEED;
     particlesRef.current = [];
+    interpolationRef.current = 0;
+    scoreRef.current = 0;
     setScore(0);
     setGameOver(false);
     setGameStarted(true);
