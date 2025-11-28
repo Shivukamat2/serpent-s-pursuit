@@ -96,113 +96,242 @@ export const SnakeGame = () => {
         (prevSegment.y + (segment.y - prevSegment.y) * interpolation) * GRID_SIZE;
       const size = GRID_SIZE;
       const isHead = index === 0;
+      const isTail = index === snake.length - 1;
 
-      // Gradient for body
-      const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+      // Realistic snake body with scales
+      const bodyWidth = isTail ? size * 0.6 : isHead ? size * 0.85 : size * 0.8;
+      const bodyHeight = bodyWidth;
+
+      // Main body gradient - realistic green python colors
+      const bodyGradient = ctx.createRadialGradient(
+        x + size / 2 - 3,
+        y + size / 2 - 3,
+        0,
+        x + size / 2,
+        y + size / 2,
+        bodyWidth / 2
+      );
+      
       if (isHead) {
-        gradient.addColorStop(0, "hsl(173, 80%, 45%)");
-        gradient.addColorStop(1, "hsl(160, 84%, 44%)");
+        bodyGradient.addColorStop(0, "#3d5a3d");
+        bodyGradient.addColorStop(0.4, "#2d4a2d");
+        bodyGradient.addColorStop(1, "#1d3a1d");
       } else {
         const progress = index / snake.length;
-        gradient.addColorStop(0, `hsl(173, 80%, ${40 - progress * 10}%)`);
-        gradient.addColorStop(1, `hsl(160, 84%, ${39 - progress * 10}%)`);
+        bodyGradient.addColorStop(0, `hsl(120, 30%, ${35 - progress * 8}%)`);
+        bodyGradient.addColorStop(0.5, `hsl(120, 35%, ${28 - progress * 8}%)`);
+        bodyGradient.addColorStop(1, `hsl(120, 30%, ${20 - progress * 8}%)`);
       }
 
-      ctx.fillStyle = gradient;
-      
-      // Draw rounded segment
+      // Draw main body
+      ctx.fillStyle = bodyGradient;
       ctx.beginPath();
-      ctx.arc(x + size / 2, y + size / 2, size / 2 - 1, 0, Math.PI * 2);
+      ctx.ellipse(x + size / 2, y + size / 2, bodyWidth / 2, bodyHeight / 2, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Add shadow for depth
-      ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetY = 2;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 3;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
 
-      // Draw head details
-      if (isHead) {
-        const direction = directionRef.current;
+      // Draw realistic scales pattern
+      if (!isHead) {
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.lineWidth = 1;
         
-        // Eyes
-        ctx.fillStyle = "#1a1a1a";
-        ctx.shadowBlur = 0;
-        
-        if (direction.x !== 0) {
-          // Horizontal movement
-          const eyeY = direction.x > 0 ? y + 5 : y + 5;
+        // Horizontal scale lines
+        for (let i = 0; i < 3; i++) {
+          const scaleY = y + size / 4 + (i * size / 4);
           ctx.beginPath();
-          ctx.arc(x + size / 2, eyeY, 2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(x + size / 2, y + size - 5, 2, 0, Math.PI * 2);
-          ctx.fill();
-          
-          // Eye highlights
-          ctx.fillStyle = "white";
-          ctx.beginPath();
-          ctx.arc(x + size / 2 + 1, eyeY - 1, 1, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(x + size / 2 + 1, y + size - 6, 1, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          // Vertical movement
-          const eyeX = direction.y > 0 ? x + 5 : x + 5;
-          ctx.beginPath();
-          ctx.arc(eyeX, y + size / 2, 2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(x + size - 5, y + size / 2, 2, 0, Math.PI * 2);
-          ctx.fill();
-          
-          // Eye highlights
-          ctx.fillStyle = "white";
-          ctx.beginPath();
-          ctx.arc(eyeX + 1, y + size / 2 - 1, 1, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(x + size - 4, y + size / 2 - 1, 1, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(x + size * 0.2, scaleY);
+          ctx.lineTo(x + size * 0.8, scaleY);
+          ctx.stroke();
         }
 
-        // Tongue
-        tongueRef.current = (tongueRef.current + 0.1) % (Math.PI * 2);
-        const tongueLength = 8 + Math.sin(tongueRef.current) * 4;
+        // Add scale texture with small dots
+        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+            const dotX = x + size * 0.25 + (i * size * 0.17);
+            const dotY = y + size * 0.25 + (j * size * 0.17);
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Belly pattern - lighter scales
+      const bellyGradient = ctx.createLinearGradient(
+        x + size * 0.3,
+        y + size / 2,
+        x + size * 0.7,
+        y + size / 2
+      );
+      bellyGradient.addColorStop(0, "rgba(180, 200, 160, 0)");
+      bellyGradient.addColorStop(0.5, "rgba(180, 200, 160, 0.3)");
+      bellyGradient.addColorStop(1, "rgba(180, 200, 160, 0)");
+      
+      ctx.fillStyle = bellyGradient;
+      ctx.beginPath();
+      ctx.ellipse(x + size / 2, y + size / 2, bodyWidth / 3, bodyHeight / 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Highlight for realistic shine
+      const highlightGradient = ctx.createRadialGradient(
+        x + size / 2 - 4,
+        y + size / 2 - 4,
+        0,
+        x + size / 2 - 4,
+        y + size / 2 - 4,
+        bodyWidth / 3
+      );
+      highlightGradient.addColorStop(0, "rgba(255, 255, 255, 0.25)");
+      highlightGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      
+      ctx.fillStyle = highlightGradient;
+      ctx.beginPath();
+      ctx.ellipse(x + size / 2 - 3, y + size / 2 - 3, bodyWidth / 4, bodyHeight / 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw detailed head
+      if (isHead) {
+        // Head shape - more triangular and realistic
+        ctx.fillStyle = "#3d5a3d";
+        ctx.beginPath();
         
-        ctx.strokeStyle = "#dc2626";
-        ctx.lineWidth = 2;
-        ctx.lineCap = "round";
+        if (direction.x > 0) {
+          ctx.moveTo(x + size * 0.2, y + size * 0.3);
+          ctx.lineTo(x + size * 0.9, y + size * 0.5);
+          ctx.lineTo(x + size * 0.2, y + size * 0.7);
+          ctx.closePath();
+        } else if (direction.x < 0) {
+          ctx.moveTo(x + size * 0.8, y + size * 0.3);
+          ctx.lineTo(x + size * 0.1, y + size * 0.5);
+          ctx.lineTo(x + size * 0.8, y + size * 0.7);
+          ctx.closePath();
+        } else if (direction.y > 0) {
+          ctx.moveTo(x + size * 0.3, y + size * 0.2);
+          ctx.lineTo(x + size * 0.5, y + size * 0.9);
+          ctx.lineTo(x + size * 0.7, y + size * 0.2);
+          ctx.closePath();
+        } else {
+          ctx.moveTo(x + size * 0.3, y + size * 0.8);
+          ctx.lineTo(x + size * 0.5, y + size * 0.1);
+          ctx.lineTo(x + size * 0.7, y + size * 0.8);
+          ctx.closePath();
+        }
+        ctx.fill();
+
+        // Realistic eyes - reptilian with slit pupils
+        const eyePositions = direction.x !== 0
+          ? [
+              { x: x + size / 2, y: y + size * 0.35 },
+              { x: x + size / 2, y: y + size * 0.65 }
+            ]
+          : [
+              { x: x + size * 0.35, y: y + size / 2 },
+              { x: x + size * 0.65, y: y + size / 2 }
+            ];
+
+        eyePositions.forEach((eyePos) => {
+          // Eye socket shadow
+          ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+          ctx.beginPath();
+          ctx.arc(eyePos.x, eyePos.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Eye white/iris - yellow-green
+          const eyeGradient = ctx.createRadialGradient(
+            eyePos.x,
+            eyePos.y,
+            0,
+            eyePos.x,
+            eyePos.y,
+            3.5
+          );
+          eyeGradient.addColorStop(0, "#c4d600");
+          eyeGradient.addColorStop(0.6, "#9ab000");
+          eyeGradient.addColorStop(1, "#708000");
+          ctx.fillStyle = eyeGradient;
+          ctx.beginPath();
+          ctx.arc(eyePos.x, eyePos.y, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Vertical slit pupil (reptilian)
+          ctx.fillStyle = "#000000";
+          ctx.beginPath();
+          if (direction.x !== 0) {
+            ctx.ellipse(eyePos.x, eyePos.y, 0.8, 3, 0, 0, Math.PI * 2);
+          } else {
+            ctx.ellipse(eyePos.x, eyePos.y, 3, 0.8, 0, 0, Math.PI * 2);
+          }
+          ctx.fill();
+
+          // Eye shine
+          ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+          ctx.beginPath();
+          ctx.arc(eyePos.x - 1, eyePos.y - 1, 1, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Realistic forked tongue
+        tongueRef.current = (tongueRef.current + 0.08) % (Math.PI * 2);
+        const tongueLength = 10 + Math.sin(tongueRef.current) * 3;
         
         const tongueStartX = x + size / 2 + direction.x * size / 2;
         const tongueStartY = y + size / 2 + direction.y * size / 2;
         const tongueEndX = tongueStartX + direction.x * tongueLength;
         const tongueEndY = tongueStartY + direction.y * tongueLength;
         
+        // Tongue shadow
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(tongueStartX + 1, tongueStartY + 1);
+        ctx.lineTo(tongueEndX + 1, tongueEndY + 1);
+        ctx.stroke();
+
+        // Main tongue - red with gradient
+        const tongueGradient = ctx.createLinearGradient(
+          tongueStartX,
+          tongueStartY,
+          tongueEndX,
+          tongueEndY
+        );
+        tongueGradient.addColorStop(0, "#dc2626");
+        tongueGradient.addColorStop(1, "#b91c1c");
+        ctx.strokeStyle = tongueGradient;
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(tongueStartX, tongueStartY);
         ctx.lineTo(tongueEndX, tongueEndY);
         ctx.stroke();
 
-        // Tongue fork
-        const forkAngle = Math.PI / 6;
-        const forkLength = 3;
+        // Forked tip
+        const forkLength = 4;
+        const forkAngle = Math.PI / 5;
+        
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(tongueEndX, tongueEndY);
         if (direction.x !== 0) {
-          ctx.lineTo(tongueEndX, tongueEndY - forkLength);
+          ctx.lineTo(tongueEndX + direction.x * 2, tongueEndY - forkLength);
           ctx.moveTo(tongueEndX, tongueEndY);
-          ctx.lineTo(tongueEndX, tongueEndY + forkLength);
+          ctx.lineTo(tongueEndX + direction.x * 2, tongueEndY + forkLength);
         } else {
-          ctx.lineTo(tongueEndX - forkLength, tongueEndY);
+          ctx.lineTo(tongueEndX - forkLength, tongueEndY + direction.y * 2);
           ctx.moveTo(tongueEndX, tongueEndY);
-          ctx.lineTo(tongueEndX + forkLength, tongueEndY);
+          ctx.lineTo(tongueEndX + forkLength, tongueEndY + direction.y * 2);
         }
         ctx.stroke();
       }
-
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
     });
   };
 
