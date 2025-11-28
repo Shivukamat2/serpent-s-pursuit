@@ -33,6 +33,7 @@ export const SnakeGame = () => {
   const [gameStarted, setGameStarted] = useState(false);
 
   const snakeRef = useRef<Position[]>([{ x: 10, y: 10 }]);
+  const prevSnakeRef = useRef<Position[]>([{ x: 10, y: 10 }]);
   const directionRef = useRef<Position>({ x: 1, y: 0 });
   const nextDirectionRef = useRef<Position>({ x: 1, y: 0 });
   const coinRef = useRef<Position>({ x: 15, y: 10 });
@@ -83,18 +84,16 @@ export const SnakeGame = () => {
 
   const drawSnake = (ctx: CanvasRenderingContext2D) => {
     const snake = snakeRef.current;
+    const prevSnake = prevSnakeRef.current;
     const interpolation = interpolationRef.current;
     const direction = directionRef.current;
     
     snake.forEach((segment, index) => {
-      let x = segment.x * GRID_SIZE;
-      let y = segment.y * GRID_SIZE;
-      
-      // Smooth interpolation for head
-      if (index === 0) {
-        x -= direction.x * GRID_SIZE * interpolation;
-        y -= direction.y * GRID_SIZE * interpolation;
-      }
+      const prevSegment = prevSnake[index] ?? segment;
+      const x =
+        (prevSegment.x + (segment.x - prevSegment.x) * interpolation) * GRID_SIZE;
+      const y =
+        (prevSegment.y + (segment.y - prevSegment.y) * interpolation) * GRID_SIZE;
       const size = GRID_SIZE;
       const isHead = index === 0;
 
@@ -289,6 +288,9 @@ export const SnakeGame = () => {
       lastUpdateRef.current = timestamp;
       interpolationRef.current = 0;
 
+      // Store previous snake positions for interpolation
+      prevSnakeRef.current = snakeRef.current.map((segment) => ({ ...segment }));
+
       // Update direction
       directionRef.current = nextDirectionRef.current;
 
@@ -353,6 +355,7 @@ export const SnakeGame = () => {
 
   const startGame = () => {
     snakeRef.current = [{ x: 10, y: 10 }];
+    prevSnakeRef.current = [{ x: 10, y: 10 }];
     directionRef.current = { x: 1, y: 0 };
     nextDirectionRef.current = { x: 1, y: 0 };
     speedRef.current = INITIAL_SPEED;
