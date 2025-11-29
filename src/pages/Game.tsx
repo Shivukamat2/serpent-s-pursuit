@@ -25,14 +25,14 @@ const Game = () => {
   }
 
   return (
-    <div className="min-h-screen p-6 relative overflow-hidden">
+    <div className="min-h-screen p-4 relative overflow-hidden flex items-center justify-center">
       {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 space-y-6">
+      <div className="w-full max-w-5xl mx-auto relative z-10 space-y-3 py-4">
         {/* Header */}
         <div className="flex justify-between items-center">
           <Button
@@ -64,52 +64,38 @@ const Game = () => {
         </div>
 
         {/* Game Container */}
-        <div className="flex justify-center">
-          <Card className="p-8 bg-card/80 backdrop-blur-sm">
-            <div className="space-y-4">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold mb-2">Serpent's Pursuit</h1>
-                <p className="text-muted-foreground">
-                  Use <kbd className="px-2 py-1 bg-muted rounded">W</kbd>
-                  <kbd className="px-2 py-1 bg-muted rounded ml-1">A</kbd>
-                  <kbd className="px-2 py-1 bg-muted rounded ml-1">S</kbd>
-                  <kbd className="px-2 py-1 bg-muted rounded ml-1">D</kbd> to control
-                </p>
-              </div>
+        <Card className="p-6 bg-card/80 backdrop-blur-sm max-w-3xl mx-auto">
+          <div className="space-y-3">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-1">Serpent's Pursuit</h1>
+              <p className="text-sm text-muted-foreground">
+                Use <kbd className="px-2 py-1 bg-muted rounded text-xs">W</kbd>
+                <kbd className="px-2 py-1 bg-muted rounded ml-1 text-xs">A</kbd>
+                <kbd className="px-2 py-1 bg-muted rounded ml-1 text-xs">S</kbd>
+                <kbd className="px-2 py-1 bg-muted rounded ml-1 text-xs">D</kbd> to control
+              </p>
+            </div>
 
-              <SnakeGame
-                onCoinCollected={(coinsThisRun) => {
-                  addCoins(1);
-                }}
-                onGameOver={(totalCoinsThisRun) => {
-                  // Coins already added during collection
-                }}
-              />
+            <SnakeGame
+              onCoinCollected={(coinsThisRun) => {
+                addCoins(1);
+              }}
+              onGameOver={(totalCoinsThisRun) => {
+                // Coins already added during collection
+              }}
+            />
 
-              <div className="pt-4 border-t text-center space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Every coin you collect is automatically added to your wallet balance
-                </p>
-                <div className="flex items-center justify-center gap-2 text-accent">
-                  <Coins className="w-5 h-5" />
-                  <span className="text-2xl font-bold">{totalCoins}</span>
-                  <span className="text-muted-foreground">coins mined</span>
-                </div>
+            <div className="pt-3 border-t text-center space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Every coin you collect is automatically added to your wallet balance
+              </p>
+              <div className="flex items-center justify-center gap-2 text-accent">
+                <Coins className="w-5 h-5" />
+                <span className="text-2xl font-bold">{totalCoins}</span>
+                <span className="text-sm text-muted-foreground">coins mined</span>
               </div>
             </div>
-          </Card>
-        </div>
-
-        {/* Instructions */}
-        <Card className="p-6 max-w-2xl mx-auto bg-card/80 backdrop-blur-sm">
-          <h3 className="font-semibold mb-3">How to Play:</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• Control the snake using WASD keys</li>
-            <li>• Collect golden coins to grow longer and earn rewards</li>
-            <li>• Avoid hitting walls and your own body</li>
-            <li>• Speed increases as you collect more coins</li>
-            <li>• All coins are tracked to your connected wallet</li>
-          </ul>
+          </div>
         </Card>
       </div>
     </div>
