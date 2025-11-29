@@ -15,12 +15,17 @@ interface Particle {
   maxLife: number;
 }
 
+interface SnakeGameProps {
+  onCoinCollected?: (coinsThisRun: number) => void;
+  onGameOver?: (totalCoinsThisRun: number) => void;
+}
+
 const GRID_SIZE = 20;
 const INITIAL_SPEED = 150;
 const SPEED_INCREMENT = 5;
 const MIN_SPEED = 50;
 
-export const SnakeGame = () => {
+export const SnakeGame = ({ onCoinCollected, onGameOver }: SnakeGameProps = {}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(() => {
@@ -435,12 +440,18 @@ export const SnakeGame = () => {
       // Check wall collision
       if (newHead.x < 0 || newHead.x >= cols || newHead.y < 0 || newHead.y >= rows) {
         setGameOver(true);
+        if (onGameOver) {
+          onGameOver(scoreRef.current);
+        }
         return;
       }
 
       // Check self collision
       if (snakeRef.current.some((segment) => segment.x === newHead.x && segment.y === newHead.y)) {
         setGameOver(true);
+        if (onGameOver) {
+          onGameOver(scoreRef.current);
+        }
         return;
       }
 
@@ -465,6 +476,11 @@ export const SnakeGame = () => {
         
         // Increase speed
         speedRef.current = Math.max(MIN_SPEED, speedRef.current - SPEED_INCREMENT);
+
+        // Notify parent component
+        if (onCoinCollected) {
+          onCoinCollected(scoreRef.current);
+        }
       } else {
         snakeRef.current.pop();
       }
