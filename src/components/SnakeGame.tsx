@@ -31,9 +31,6 @@ export const SnakeGame = ({ onCoinCollected, onGameOver }: SnakeGameProps = {}) 
   const [bestScore, setBestScore] = useState(() => {
     return parseInt(localStorage.getItem("snakeBestScore") || "0");
   });
-  const [totalCoins, setTotalCoins] = useState(() => {
-    return parseInt(localStorage.getItem("snakeTotalCoins") || "0");
-  });
   const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
 
@@ -461,10 +458,6 @@ export const SnakeGame = ({ onCoinCollected, onGameOver }: SnakeGameProps = {}) 
       if (newHead.x === coinRef.current.x && newHead.y === coinRef.current.y) {
         scoreRef.current += 1;
         setScore(scoreRef.current);
-        
-        const newTotal = totalCoins + 1;
-        setTotalCoins(newTotal);
-        localStorage.setItem("snakeTotalCoins", newTotal.toString());
 
         if (scoreRef.current > bestScore) {
           setBestScore(scoreRef.current);
@@ -549,7 +542,7 @@ export const SnakeGame = ({ onCoinCollected, onGameOver }: SnakeGameProps = {}) 
   }, [gameStarted, gameOver]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 gap-6">
+    <div className="flex flex-col items-center gap-4">
       <div className="flex gap-4 flex-wrap justify-center">
         <div className="backdrop-blur-sm bg-card/80 rounded-2xl px-6 py-3 shadow-lg border border-border/50">
           <div className="text-sm text-muted-foreground">Score</div>
@@ -558,10 +551,6 @@ export const SnakeGame = ({ onCoinCollected, onGameOver }: SnakeGameProps = {}) 
         <div className="backdrop-blur-sm bg-card/80 rounded-2xl px-6 py-3 shadow-lg border border-border/50">
           <div className="text-sm text-muted-foreground">Best</div>
           <div className="text-3xl font-bold text-primary">{bestScore}</div>
-        </div>
-        <div className="backdrop-blur-sm bg-card/80 rounded-2xl px-6 py-3 shadow-lg border border-border/50">
-          <div className="text-sm text-muted-foreground">Total Coins</div>
-          <div className="text-3xl font-bold text-accent">{totalCoins}</div>
         </div>
       </div>
 
@@ -601,9 +590,6 @@ export const SnakeGame = ({ onCoinCollected, onGameOver }: SnakeGameProps = {}) 
         )}
       </div>
 
-      <div className="text-center text-muted-foreground text-sm">
-        <p>Press <kbd className="px-2 py-1 bg-muted rounded">W</kbd> <kbd className="px-2 py-1 bg-muted rounded">A</kbd> <kbd className="px-2 py-1 bg-muted rounded">S</kbd> <kbd className="px-2 py-1 bg-muted rounded">D</kbd> to control the snake</p>
-      </div>
     </div>
   );
 };
