@@ -2,6 +2,8 @@
 
 ## Project info
 
+preview link will be published below
+
 **URL**: https://lovable.dev/projects/a518c025-754e-4e74-b9f3-0b77c40d5c25
 
 ## How can I edit this code?
