@@ -4,9 +4,7 @@
 
 preview link will be published below
 
-**URL**:https://lovable.dev/projects/a518c025-754e-4e74-b9f3-0b77c40d5c2
-&
-https://preview--slither-real-canvas.lovable.app/profile
+**URL**:https://preview--slither-real-canvas.lovable.app/?__lovable_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiUzdONjI3ZE5aNmJjRmtzTlVxcDh4Ymo0c1F2MiIsInByb2plY3RfaWQiOiJhNTE4YzAyNS03NTRlLTRlNzQtYjlmMy0wYjc3YzQwZDVjMjUiLCJub25jZSI6IjRmZTI1NzEzMmMwM2Q5ZDA3NDI4ZjJiOGVkYzFjMmE2IiwiaXNzIjoibG92YWJsZS1hcGkiLCJzdWIiOiJhNTE4YzAyNS03NTRlLTRlNzQtYjlmMy0wYjc3YzQwZDVjMjUiLCJhdWQiOlsibG92YWJsZS1hcHAiXSwiZXhwIjoxNzY1MDk4NjEwLCJuYmYiOjE3NjQ0OTM4MTAsImlhdCI6MTc2NDQ5MzgxMH0.lwp_TxyIszMG4qjj9PDIHGB_YnStnno1xxs00xizLwM/
 
 ## How can I edit this code?
 
