@@ -4,7 +4,9 @@
 
 preview link will be published below
 
-**URL**:https://preview--slither-real-canvas.lovable.app/profile
+**URL**:https://lovable.dev/projects/a518c025-754e-4e74-b9f3-0b77c40d5c2
+&
+https://preview--slither-real-canvas.lovable.app/profile
 
 ## How can I edit this code?
 
