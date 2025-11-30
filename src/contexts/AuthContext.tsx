@@ -110,10 +110,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const addCoins = (amount: number) => {
     if (!walletAddress) return;
 
-    const newTotal = totalCoins + amount;
-    setTotalCoins(newTotal);
-
     const key = `snakeCoins:${walletAddress}`;
+    const current = Number(localStorage.getItem(key) || "0");
+    const newTotal = current + amount;
+    
+    setTotalCoins(newTotal);
     localStorage.setItem(key, newTotal.toString());
 
     // Update leaderboard
