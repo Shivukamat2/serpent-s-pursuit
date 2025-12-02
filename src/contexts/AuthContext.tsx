@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Load total coins for current user
     if (username && walletAddress) {
-      const key = `snakeCoins:${walletAddress}`;
+      const key = `coins:${walletAddress}`;
       const stored = localStorage.getItem(key);
       setTotalCoins(stored ? parseInt(stored) : 0);
     }
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUsername(null);
     setWalletAddress(null);
     localStorage.removeItem("snakeUsername");
-    localStorage.removeItem("snakeWallet");
+    localStorage.removeItem("walletAddress");
     setTotalCoins(0);
   };
 
@@ -81,19 +81,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       const address = accounts[0];
       setWalletAddress(address);
-      localStorage.setItem("snakeWallet", address);
-
-      // Store username -> wallet mapping
-      if (username) {
-        const mapping = JSON.parse(
-          localStorage.getItem("snakeWalletMapping") || "{}"
-        );
-        mapping[address] = username;
-        localStorage.setItem("snakeWalletMapping", JSON.stringify(mapping));
-      }
+      localStorage.setItem("walletAddress", address);
 
       // Load coins for this wallet
-      const key = `snakeCoins:${address}`;
+      const key = `coins:${address}`;
       const stored = localStorage.getItem(key);
       setTotalCoins(stored ? parseInt(stored) : 0);
     } catch (error) {
@@ -104,40 +95,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const disconnectWallet = () => {
     setWalletAddress(null);
-    localStorage.removeItem("snakeWallet");
+    localStorage.removeItem("walletAddress");
   };
 
   const addCoins = (amount: number) => {
     if (!walletAddress) return;
 
-    const key = `snakeCoins:${walletAddress}`;
+    // Use coins:<wallet> key format as per requirements
+    const key = `coins:${walletAddress}`;
+    // Always read from localStorage to ensure accuracy
     const current = Number(localStorage.getItem(key) || "0");
     const newTotal = current + amount;
     
     setTotalCoins(newTotal);
     localStorage.setItem(key, newTotal.toString());
 
-    // Update leaderboard
-    const leaderboard = JSON.parse(
-      localStorage.getItem("snakeLeaderboard") || "[]"
+    // Update global players leaderboard
+    const players = JSON.parse(
+      localStorage.getItem("players") || "[]"
     );
     
-    const existingIndex = leaderboard.findIndex(
+    const existingIndex = players.findIndex(
       (entry: any) => entry.wallet === walletAddress
     );
 
     if (existingIndex >= 0) {
-      leaderboard[existingIndex].totalCoins = newTotal;
+      // Update existing player record
+      players[existingIndex].totalCoins = newTotal;
+      players[existingIndex].username = username || "Anonymous";
     } else {
-      leaderboard.push({
+      // Add new player record
+      players.push({
         username: username || "Anonymous",
         wallet: walletAddress,
         totalCoins: newTotal,
       });
     }
 
-    leaderboard.sort((a: any, b: any) => b.totalCoins - a.totalCoins);
-    localStorage.setItem("snakeLeaderboard", JSON.stringify(leaderboard));
+    // Sort by totalCoins descending
+    players.sort((a: any, b: any) => b.totalCoins - a.totalCoins);
+    localStorage.setItem("players", JSON.stringify(players));
   };
 
   return (

@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Wallet, Trophy, Play, LogOut, Coins } from "lucide-react";
+import { Wallet, Trophy, Play, LogOut, Coins, Plus } from "lucide-react";
+import { addSnakeCoinToMetaMask, isTokenContractConfigured } from "@/utils/metamask";
+import { useToast } from "@/hooks/use-toast";
 
 interface LeaderboardEntry {
   username: string;
@@ -13,6 +15,7 @@ interface LeaderboardEntry {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     username,
     walletAddress,
@@ -30,8 +33,8 @@ const Profile = () => {
       return;
     }
 
-    // Load leaderboard
-    const stored = localStorage.getItem("snakeLeaderboard");
+    // Load players leaderboard
+    const stored = localStorage.getItem("players");
     if (stored) {
       const data = JSON.parse(stored);
       setLeaderboard(data.slice(0, 10)); // Top 10
@@ -45,6 +48,31 @@ const Profile = () => {
 
   const shortenAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const handleAddTokenToMetaMask = async () => {
+    if (!isTokenContractConfigured()) {
+      toast({
+        title: "Token Not Deployed Yet",
+        description: "The SnakeCoin ERC-20 contract hasn't been deployed. This feature will be available once the contract is ready.",
+        variant: "default",
+      });
+      return;
+    }
+
+    const success = await addSnakeCoinToMetaMask();
+    if (success) {
+      toast({
+        title: "Token Added!",
+        description: "SnakeCoin has been added to your MetaMask wallet.",
+      });
+    } else {
+      toast({
+        title: "Failed to Add Token",
+        description: "Could not add SnakeCoin to MetaMask. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -95,7 +123,7 @@ const Profile = () => {
               )}
             </div>
             {isMetaMaskInstalled && (
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 {!walletAddress ? (
                   <Button
                     onClick={connectWallet}
@@ -105,9 +133,23 @@ const Profile = () => {
                     Connect Wallet
                   </Button>
                 ) : (
-                  <Button variant="outline" onClick={disconnectWallet}>
-                    Disconnect
-                  </Button>
+                  <>
+                    <Button variant="outline" onClick={disconnectWallet}>
+                      Disconnect
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={handleAddTokenToMetaMask}
+                      className="text-xs"
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add SnakeCoin to MetaMask
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      (when contract is ready)
+                    </p>
+                  </>
                 )}
               </div>
             )}
