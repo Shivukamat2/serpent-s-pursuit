@@ -1,9 +1,11 @@
 // MetaMask Token Utilities
-
-// TODO: Replace with actual deployed token contract address
-const TOKEN_ADDRESS: string = "<PUT_TOKEN_CONTRACT_ADDRESS_HERE>";
-const TOKEN_SYMBOL = "SNAKE";
-const TOKEN_DECIMALS = 18;
+import {
+  SNAKECOIN_ADDRESS,
+  SNAKECOIN_SYMBOL,
+  SNAKECOIN_DECIMALS,
+  SNAKECOIN_CHAIN_ID,
+  isTokenConfigured,
+} from "@/lib/tokenConfig";
 
 /**
  * Add SnakeCoin token to MetaMask wallet
@@ -15,15 +17,20 @@ export async function addSnakeCoinToMetaMask() {
     return false;
   }
 
+  if (!isTokenConfigured()) {
+    console.error("SnakeCoin contract address not configured");
+    return false;
+  }
+
   try {
     const wasAdded = await window.ethereum.request({
       method: "wallet_watchAsset",
       params: {
         type: "ERC20",
         options: {
-          address: TOKEN_ADDRESS,
-          symbol: TOKEN_SYMBOL,
-          decimals: TOKEN_DECIMALS,
+          address: SNAKECOIN_ADDRESS,
+          symbol: SNAKECOIN_SYMBOL,
+          decimals: SNAKECOIN_DECIMALS,
         },
       } as any,
     });
@@ -42,10 +49,31 @@ export async function addSnakeCoinToMetaMask() {
 }
 
 /**
- * Check if the placeholder token address has been replaced with a real contract
+ * Check if the token contract is properly configured
  */
 export function isTokenContractConfigured(): boolean {
-  return TOKEN_ADDRESS !== "<PUT_TOKEN_CONTRACT_ADDRESS_HERE>" && 
-         TOKEN_ADDRESS.length > 0 && 
-         TOKEN_ADDRESS.indexOf("0x") === 0;
+  return isTokenConfigured();
+}
+
+/**
+ * Get the expected chain ID for SnakeCoin (Sepolia testnet)
+ */
+export function getSnakeCoinChainId(): number {
+  return SNAKECOIN_CHAIN_ID;
+}
+
+/**
+ * Check if the user is on the correct network for SnakeCoin
+ */
+export async function isOnCorrectNetwork(): Promise<boolean> {
+  if (!window.ethereum) return false;
+
+  try {
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    const currentChainId = parseInt(chainId as string, 16);
+    return currentChainId === SNAKECOIN_CHAIN_ID;
+  } catch (error) {
+    console.error("Failed to check network:", error);
+    return false;
+  }
 }

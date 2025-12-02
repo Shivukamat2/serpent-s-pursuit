@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Wallet, Trophy, Play, LogOut, Coins, Plus } from "lucide-react";
-import { addSnakeCoinToMetaMask, isTokenContractConfigured } from "@/utils/metamask";
+import { Wallet, Trophy, Play, LogOut, Coins, Plus, AlertCircle } from "lucide-react";
+import { addSnakeCoinToMetaMask, isTokenContractConfigured, isOnCorrectNetwork } from "@/utils/metamask";
 import { useToast } from "@/hooks/use-toast";
+import { isTokenConfigured } from "@/lib/tokenConfig";
 
 interface LeaderboardEntry {
   username: string;
@@ -26,6 +27,7 @@ const Profile = () => {
     isMetaMaskInstalled,
   } = useAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [correctNetwork, setCorrectNetwork] = useState(true);
 
   useEffect(() => {
     if (!username) {
@@ -39,6 +41,13 @@ const Profile = () => {
       const data = JSON.parse(stored);
       setLeaderboard(data.slice(0, 10)); // Top 10
     }
+
+    // Check if on correct network
+    const checkNetwork = async () => {
+      const onCorrect = await isOnCorrectNetwork();
+      setCorrectNetwork(onCorrect);
+    };
+    checkNetwork();
   }, [username, navigate, totalCoins]);
 
   const handleLogout = () => {
@@ -51,11 +60,20 @@ const Profile = () => {
   };
 
   const handleAddTokenToMetaMask = async () => {
-    if (!isTokenContractConfigured()) {
+    if (!isTokenConfigured()) {
       toast({
         title: "Token Not Deployed Yet",
-        description: "The SnakeCoin ERC-20 contract hasn't been deployed. This feature will be available once the contract is ready.",
+        description: "The SnakeCoin ERC-20 contract hasn't been deployed. Please update the contract address in tokenConfig.ts",
         variant: "default",
+      });
+      return;
+    }
+
+    if (!correctNetwork) {
+      toast({
+        title: "Wrong Network",
+        description: "Please switch MetaMask to Sepolia testnet to add SnakeCoin.",
+        variant: "destructive",
       });
       return;
     }
@@ -137,18 +155,54 @@ const Profile = () => {
                     <Button variant="outline" onClick={disconnectWallet}>
                       Disconnect
                     </Button>
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      onClick={handleAddTokenToMetaMask}
-                      className="text-xs"
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      Add SnakeCoin to MetaMask
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center">
-                      (when contract is ready)
-                    </p>
+                    {!isTokenConfigured() ? (
+                      <>
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          disabled
+                          className="text-xs"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add SnakeCoin to MetaMask
+                        </Button>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          Token not configured yet
+                        </p>
+                      </>
+                    ) : !correctNetwork ? (
+                      <>
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={handleAddTokenToMetaMask}
+                          className="text-xs"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add SnakeCoin to MetaMask
+                        </Button>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          Switch to Sepolia testnet
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={handleAddTokenToMetaMask}
+                          className="text-xs"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add SnakeCoin to MetaMask
+                        </Button>
+                        <p className="text-xs text-muted-foreground text-center">
+                          Add token to your wallet
+                        </p>
+                      </>
+                    )}
                   </>
                 )}
               </div>
